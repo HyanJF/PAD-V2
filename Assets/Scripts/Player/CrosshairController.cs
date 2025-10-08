@@ -28,7 +28,7 @@ public class CrosshairController : MonoBehaviour
         // Limita dentro de la pantalla
         rect.anchoredPosition = new Vector2(
             Mathf.Clamp(rect.anchoredPosition.x, -775, 775),
-            Mathf.Clamp(rect.anchoredPosition.y, -540, 540)
+            Mathf.Clamp(rect.anchoredPosition.y, -430, 430)
         );
     }
 }

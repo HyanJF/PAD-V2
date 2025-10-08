@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour
     public float minSpawnDelay = 0.5f;
     public int carsPerRound = 10;
     public float roundDelay = 3f;
+    public AudioClip AmbientSound;
 
     [Header("UI")]
     public GameUI gameUI;
