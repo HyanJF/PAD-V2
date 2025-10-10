@@ -666,8 +666,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 6
   life: 1
-  lifeTime: 20
+  lifeTime: 10
   scoreValue: 1
+  hitSound: {fileID: 8300000, guid: bd6e078089456fb4e91c92e906272d2c, type: 3}
 --- !u!54 &6985419526033194465
 Rigidbody:
   m_ObjectHideFlags: 0

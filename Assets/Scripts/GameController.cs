@@ -3,6 +3,10 @@ using System.Collections;
 
 public class GameController : MonoBehaviour
 {
+    [Header("Pantalla Final")]
+    public EndGameUI endGameUI;
+    public int totalShots = 0;
+
     [Header("Controladores de Spawns")]
     public CarManager spawnController;
 
@@ -12,20 +16,30 @@ public class GameController : MonoBehaviour
     public float minSpawnDelay = 0.5f;
     public int carsPerRound = 10;
     public float roundDelay = 3f;
-    public AudioClip AmbientSound;
+
+    [Header("Audio")]
+    public AudioSource musicSource;
+    public AudioSource soundSource;
+    public AudioClip levelMusic;           
+    public AudioClip endGameMusic;
 
     [Header("UI")]
     public GameUI gameUI;
 
     int currentRound = 0;
-    bool gameActive = false;
-    int totalScore = 0; // score acumulado
+    public bool gameActive;
+    int totalScore = 0;
 
     private void Start()
     {
+        musicSource.clip = levelMusic;
+        musicSource.loop = false;
+        musicSource.Play();
+
+        gameActive = false;
         totalScore = 0;
-        gameUI?.AddScore(0);       // muestra 0 al inicio
-        gameUI?.UpdateWave(0);     // muestra 0 o lo que prefieras
+        gameUI?.AddScore(0);       
+        gameUI?.UpdateWave(0);     
         StartCoroutine(GameLoop());
     }
 
@@ -35,7 +49,7 @@ public class GameController : MonoBehaviour
 
         for (currentRound = 1; currentRound <= totalRounds; currentRound++)
         {
-            gameUI?.UpdateWave(currentRound); // actualizar UI
+            gameUI?.UpdateWave(currentRound);
 
             float spawnDelay = Mathf.Max(baseSpawnDelay - (currentRound * 0.15f), minSpawnDelay);
 
@@ -46,7 +60,9 @@ public class GameController : MonoBehaviour
 
         gameActive = false;
         Debug.Log("🎉 Juego completado");
-        // aquí podrías activar UI de victoria
+
+        EndGame();
+        endGameUI?.ShowEndScreen(totalScore, totalShots);
     }
 
     IEnumerator SpawnRound(int cars, float delay)
@@ -58,11 +74,25 @@ public class GameController : MonoBehaviour
         }
     }
 
-    // Llamar desde CarController al destruirse: FindObjectOfType<GameController>().AddScore(value);
     public void AddScore(int amount)
     {
         totalScore += amount;
-        gameUI?.AddScore(amount); // delega la visualización al GameUI
+        gameUI?.AddScore(amount);
         Debug.Log($"+{amount} pts  (Total: {totalScore})");
+    }
+
+    public void EndGame()
+    {
+
+        musicSource.Stop();
+
+        musicSource.clip = endGameMusic;
+        musicSource.loop = true;
+        musicSource.Play();
+    }
+
+    public void Playsound(AudioClip clip)
+    {
+        soundSource.PlayOneShot(clip);
     }
 }

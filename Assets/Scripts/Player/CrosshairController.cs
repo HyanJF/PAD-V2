@@ -22,10 +22,8 @@ public class CrosshairController : MonoBehaviour
 
     private void Update()
     {
-        // Movimiento relativo a pantalla
         rect.anchoredPosition += moveInput * moveSpeed * Time.deltaTime;
 
-        // Limita dentro de la pantalla
         rect.anchoredPosition = new Vector2(
             Mathf.Clamp(rect.anchoredPosition.x, -775, 775),
             Mathf.Clamp(rect.anchoredPosition.y, -430, 430)

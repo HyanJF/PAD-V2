@@ -18,7 +18,6 @@ public class AmmoUI : MonoBehaviour
     {
         if (ammoFillImage == null || maxAmmo <= 0) return;
 
-        // Calcula el porcentaje del fill
         float fill = Mathf.Clamp01((float)currentAmmo / maxAmmo);
         ammoFillImage.fillAmount = fill;
     }

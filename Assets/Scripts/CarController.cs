@@ -6,6 +6,7 @@ public class CarController : MonoBehaviour
     public int life = 1; // vida del coche
     public float lifeTime = 10f;
     public int scoreValue = 1;
+    public AudioClip hitSound;
 
     private bool initialized = false;
 
@@ -30,6 +31,7 @@ public class CarController : MonoBehaviour
             if (controller != null)
             {
                 controller.AddScore(scoreValue);
+                controller.Playsound(hitSound);
             }
             Destroy(gameObject);
             Debug.Log("🚗 Coche destruido");

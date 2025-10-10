@@ -1,87 +1,113 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class MainMenuController : MonoBehaviour
 {
     [Header("Referencias")]
-    public GameObject menuPanel;
-    public Image blackPanel;
+    public Image menuImage;
+    public GameObject[] menuChildren;
 
     [Header("Duración del Fade")]
     public float fadeDuration = 1.5f;
 
-    private bool gameStarted = false;
+    [Header("Audio")]
+    public AudioSource musicSource;
+    public AudioSource sfxSource;
+    public AudioClip backgroundMusic;
+    public AudioClip transitionMusic;
+    public AudioClip clickSound;
+
+    private bool gameStarting = false;
 
     private void Start()
     {
-        // Menú visible, juego detenido
         Time.timeScale = 0f;
-        if (menuPanel != null)
-            menuPanel.SetActive(true);
 
-        // Asegura que el panel esté completamente negro
-        if (blackPanel != null)
+        if (menuImage != null)
         {
-            Color c = blackPanel.color;
+            Color c = menuImage.color;
             c.a = 1f;
-            blackPanel.color = c;
+            menuImage.color = c;
+        }
+
+        if (musicSource != null && backgroundMusic != null)
+        {
+            musicSource.clip = backgroundMusic;
+            musicSource.loop = true;
+            musicSource.volume = .3f;
+            musicSource.Play();
         }
     }
 
     public void OnStartGame(InputAction.CallbackContext context)
     {
-        if (!context.performed || gameStarted) return;
+        if (!context.performed || gameStarting) return;
+        gameStarting = true;
 
-        gameStarted = true;
-        if (menuPanel != null)
-            menuPanel.SetActive(false);
+        PlayClickSound();
 
-        // Inicia la animación del fade
-        StartCoroutine(FadeOutAndStart());
+        foreach (var child in menuChildren)
+            child.SetActive(false);
+
+        StartCoroutine(TransitionAndLoad());
     }
 
-    private IEnumerator FadeOutAndStart()
+    private IEnumerator TransitionAndLoad()
     {
-        float elapsed = 0f;
-
-        while (elapsed < fadeDuration)
+        if (menuImage != null)
         {
-            elapsed += Time.unscaledDeltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
+            float elapsed = 0f;
+            Color startColor = menuImage.color;
+            Color targetColor = Color.black;
+            targetColor.a = 1f;
 
-            if (blackPanel != null)
+            while (elapsed < fadeDuration)
             {
-                Color c = blackPanel.color;
-                c.a = alpha;
-                blackPanel.color = c;
+                elapsed += Time.unscaledDeltaTime;
+                menuImage.color = Color.Lerp(startColor, targetColor, elapsed / fadeDuration);
+                yield return null;
             }
-
-            yield return null;
+            menuImage.color = targetColor;
         }
 
-        if (blackPanel != null)
+        if (musicSource != null && backgroundMusic != null)
         {
-            Color c = blackPanel.color;
-            c.a = 0f;
-            blackPanel.color = c;
+            float remainingTime = backgroundMusic.length - (musicSource.time % backgroundMusic.length);
+            yield return new WaitForSecondsRealtime(remainingTime);
         }
 
-        // Cuando termina el fade, arranca el juego
+        // Reproduce la música de transición
+        if (musicSource != null && transitionMusic != null)
+        {
+            musicSource.loop = false;
+            musicSource.clip = transitionMusic;
+            musicSource.Play();
+
+            yield return new WaitForSecondsRealtime(transitionMusic.length);
+        }
+
         Time.timeScale = 1f;
-        Debug.Log("🎮 Juego iniciado después del fade.");
+        SceneManager.LoadScene("level");
     }
 
     public void OnExitGame(InputAction.CallbackContext context)
     {
+        if (gameStarting) return;
         if (!context.performed) return;
-
-        Debug.Log("🚪 Saliendo del juego...");
+        PlayClickSound();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
+    }
+
+    private void PlayClickSound()
+    {
+        if (sfxSource != null && clickSound != null)
+            sfxSource.PlayOneShot(clickSound);
     }
 }
